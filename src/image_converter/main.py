@@ -1,10 +1,13 @@
 from PySide6.QtWidgets import QApplication
 import sys
 from ui.main_window import MainWindow
+import qdarktheme
 
-# sys.argv += ['-platform', 'windows:darkmode=1']
+
+qdarktheme.enable_hi_dpi()
 app = QApplication(sys.argv)
-app.setStyleSheet('')
+qdarktheme.setup_theme(theme='light')
+
 window = MainWindow()
 window.show()
 app.exec()
