@@ -1,3 +1,4 @@
 Pillow
 PySide6
 pyqtdarktheme
+pytest

@@ -1,5 +1,6 @@
 import typing
 import enum
+import os
 from .jpeg import jpeg_decode, jpeg_encode, EXTENSIONS as JPEG_EXTENSIONS
 from .webp import webp_decode, webp_encode, EXTENSIONS as WEBP_EXTENSIONS
 from .png import png_decode, png_encode, EXTENSIONS as PNG_EXTENSIONS
@@ -86,6 +87,10 @@ def convert_image(file_path: str, out_dir: str, out_format: ImageFormat):
     image = _decode_image(extension, file_path)
 
     out_file_path = f"{out_dir}/{file_path.split('/')[-1].split('.')[0]}.{out_format.value.lower()}"
+
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    out_file_path = os.path.join(out_dir, f"{base_name}.{out_format.value.lower()}")
+
     with open(out_file_path, 'wb') as out_file:
         _encode_image(image, out_file, out_format)
 
@@ -106,6 +111,9 @@ def convert_images(file_paths: typing.List[str], out_dir: str, out_format: Image
         except UnidentifiedImageError as e:
             err_msg = f"{file_path} is not a valid image file according to its extension"
             err_obj = e
+        except UnidentifiedExtensionError as e:
+            err_msg = f"{file_path} is not support by this application"
+            err_obj = e
         except FileNotFoundError as e:
             err_msg = f"{file_path} not found"
             err_obj = e
@@ -120,7 +128,7 @@ def convert_images(file_paths: typing.List[str], out_dir: str, out_format: Image
             if err_msg:
                 errors.append(err_msg)
                 errors_obj.append(err_obj)
-                logger.error(err_msg, exc_info=err_obj)
+                logger.error(err_msg)
                 err_msg = None
                 err_obj = None
 
