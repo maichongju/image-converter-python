@@ -6,8 +6,8 @@ from PySide6.QtGui import QIcon
 
 from image_converter.utils import get_icon_path
 from .file_list_item import FileListItem
-
-SUPPORTED_FORMATS = ['JPEG', 'PNG']
+from image_converter.codex import convert_images, ImageFormat
+from image_converter.ui.convert_result_dialog import ConvertResultDialog
 
 
 class MainWindow(QMainWindow):
@@ -34,19 +34,28 @@ class MainWindow(QMainWindow):
         layout_top.addLayout(layout_input)
 
         layout_input.addWidget(QLabel("Source files:"))
+
+        layout_file_actions = QHBoxLayout()
+        layout_input.addLayout(layout_file_actions)
+
         btn_add_input_files = QPushButton("Add files")
         btn_add_input_files.clicked.connect(self._btn_add_input_files_clicked)
-        layout_input.addWidget(btn_add_input_files)
+        layout_file_actions.addWidget(btn_add_input_files)
+
+        btn_clear_all_files = QPushButton("Clear all")
+        btn_clear_all_files.clicked.connect(self._clear_all_files)
+        layout_file_actions.addWidget(btn_clear_all_files)
+
         self.list_widget_input_files = QListWidget()
         layout_input.addWidget(self.list_widget_input_files)
 
         layout_output = QVBoxLayout()
         layout_top.addLayout(layout_output)
         layout_output.addWidget(QLabel("Output format:"))
-        combo_output_format = QComboBox(main_widget)
-        combo_output_format.addItems(SUPPORTED_FORMATS)
-        combo_output_format.setFixedWidth(200)
-        layout_output.addWidget(combo_output_format)
+        self.combo_output_format = QComboBox(main_widget)
+        self.combo_output_format.addItems(ImageFormat.get_all_formats())
+        self.combo_output_format.setFixedWidth(200)
+        layout_output.addWidget(self.combo_output_format)
 
         layout_output.addWidget(QLabel("Output directory:"))
         layout_output_dir = QHBoxLayout()
@@ -85,14 +94,11 @@ class MainWindow(QMainWindow):
         self.progress_bar_convert.setRange(0, len(self.input_file))
         self.progress_bar_convert.setValue(0)
 
-        print("Converting files")
-        print("Input files:")
-        for file in self.input_file:
-            print(file)
-            self.progress_bar_convert.setValue(self.progress_bar_convert.value() + 1)
-            time.sleep(1)
-        print("Output directory:")
-        print(self._output_dir)
+        selected_format = self.combo_output_format.currentText()
+
+        result = convert_images(self.input_file, self._output_dir, ImageFormat.from_str(selected_format),
+                                self.progress_bar_convert.setValue)
+        ConvertResultDialog(result, self).exec()
         self.btn_convert.setEnabled(True)
 
     def _btn_add_input_files_clicked(self):
@@ -113,7 +119,7 @@ class MainWindow(QMainWindow):
             self.input_file.append(file_name)
 
             list_item = QListWidgetItem(self.list_widget_input_files)
-            item = FileListItem(file_name,list_item, self._remove_file)
+            item = FileListItem(file_name, list_item, self._remove_file)
             list_item.setSizeHint(item.sizeHint())
             self.list_widget_input_files.addItem(list_item)
             self.list_widget_input_files.setItemWidget(list_item, item)
@@ -121,3 +127,8 @@ class MainWindow(QMainWindow):
     def _remove_file(self, file_name: str, item: QListWidgetItem):
         self.input_file.remove(file_name)
         self.list_widget_input_files.takeItem(self.list_widget_input_files.row(item))
+
+    def _clear_all_files(self):
+        self.input_file.clear()
+        self.list_widget_input_files.clear()
+        self.progress_bar_convert.setValue(0)
