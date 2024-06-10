@@ -97,7 +97,8 @@ def convert_image(file_path: str, out_dir: str, out_format: ImageFormat):
 
 def convert_images(file_paths: typing.List[str], out_dir: str, out_format: ImageFormat,
                    progress_cb: typing.Callable[[int], None] | None = None) -> ConvertResult:
-    progress_cb(0)
+    if progress_cb is not None:
+        progress_cb(0)
     total = len(file_paths)
     success = 0
     errors = []
@@ -124,7 +125,8 @@ def convert_images(file_paths: typing.List[str], out_dir: str, out_format: Image
             err_msg = f"An unexpected error occurred while processing {file_path}"
             err_obj = e
         finally:
-            progress_cb(i + 1)
+            if progress_cb is not None:
+                progress_cb(i + 1)
             if err_msg:
                 errors.append(err_msg)
                 errors_obj.append(err_obj)
