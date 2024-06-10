@@ -13,6 +13,9 @@ test_dir = os.path.join(os.path.dirname(__file__))
 resources_dir = os.path.join(test_dir, 'resources')
 output_dir = os.path.join(test_dir, 'output')
 
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
 
 def get_input_file_path(file_format: str):
     return os.path.join(resources_dir, f'test.{file_format.lower()}')
