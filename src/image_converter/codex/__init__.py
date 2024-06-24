@@ -4,6 +4,8 @@ import os
 from .jpeg import jpeg_decode, jpeg_encode, EXTENSIONS as JPEG_EXTENSIONS
 from .webp import webp_decode, webp_encode, EXTENSIONS as WEBP_EXTENSIONS
 from .png import png_decode, png_encode, EXTENSIONS as PNG_EXTENSIONS
+from .blp import blp_decode, blp_encode, EXTENSIONS as BLP_EXTENSIONS
+from .bmp import bmp_decode, bmp_encode, EXTENSIONS as BMP_EXTENSIONS
 from PIL import UnidentifiedImageError
 import dataclasses
 import logging
@@ -11,20 +13,29 @@ from image_converter.utils import setup_logger
 
 logger = setup_logger(logging.DEBUG)
 
-SUPPORTED_EXTENSIONS = JPEG_EXTENSIONS + WEBP_EXTENSIONS + PNG_EXTENSIONS
+SUPPORTED_EXTENSIONS = (JPEG_EXTENSIONS +
+                        WEBP_EXTENSIONS +
+                        PNG_EXTENSIONS +
+                        # BLP_EXTENSIONS
+                        BMP_EXTENSIONS
+                        )
 
 
 class ImageFormat(enum.Enum):
     JPEG = 'JPEG'
     WEBP = 'WEBP'
     PNG = 'PNG'
+    # BLP = 'BLP'
+    BMP = 'BMP'
 
     def __str__(self):
         return self.value
 
     @classmethod
     def get_all_formats(cls):
-        return [_format.value for _format in cls]
+        formats = [_format.value for _format in cls]
+        formats.sort()
+        return formats
 
     @classmethod
     def from_str(cls, string: str):
@@ -41,9 +52,12 @@ class ImageFormat(enum.Enum):
             return cls.WEBP
         elif extension in PNG_EXTENSIONS:
             return cls.PNG
+        # elif extension in BLP_EXTENSIONS:
+        #     return cls.BLP
+        elif extension in BMP_EXTENSIONS:
+            return cls.BMP
         else:
             raise ValueError(f"Unsupported extension: {extension}")
-
 
 
 @dataclasses.dataclass
@@ -66,6 +80,10 @@ def _encode_image(image: typing.BinaryIO, out_file: typing.BinaryIO, out_format:
         webp_encode(image, out_file)
     elif out_format == ImageFormat.PNG:
         png_encode(image, out_file)
+    # elif out_format == ImageFormat.BLP:
+    #     blp_encode(image, out_file)
+    elif out_format == ImageFormat.BMP:
+        bmp_encode(image, out_file)
     else:
         raise ValueError(f"Unsupported format: {out_format}")
 
@@ -77,6 +95,10 @@ def _decode_image(extension: str, file_path: str):
         return webp_decode(file_path)
     elif extension in PNG_EXTENSIONS:
         return png_decode(file_path)
+    # elif extension in BLP_EXTENSIONS:
+    #     return blp_decode(file_path)
+    elif extension in BMP_EXTENSIONS:
+        return bmp_decode(file_path)
     else:
         raise UnidentifiedExtensionError(f"Unsupported extension: {extension}")
 
