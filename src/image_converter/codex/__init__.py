@@ -6,6 +6,7 @@ from .webp import webp_decode, webp_encode, EXTENSIONS as WEBP_EXTENSIONS
 from .png import png_decode, png_encode, EXTENSIONS as PNG_EXTENSIONS
 from .blp import blp_decode, blp_encode, EXTENSIONS as BLP_EXTENSIONS
 from .bmp import bmp_decode, bmp_encode, EXTENSIONS as BMP_EXTENSIONS
+from .gif import gif_decode, gif_encode, EXTENSIONS as GIF_EXTENSIONS
 from PIL import UnidentifiedImageError
 import dataclasses
 import logging
@@ -17,7 +18,8 @@ SUPPORTED_EXTENSIONS = (JPEG_EXTENSIONS +
                         WEBP_EXTENSIONS +
                         PNG_EXTENSIONS +
                         # BLP_EXTENSIONS
-                        BMP_EXTENSIONS
+                        BMP_EXTENSIONS +
+                        GIF_EXTENSIONS
                         )
 
 
@@ -27,6 +29,7 @@ class ImageFormat(enum.Enum):
     PNG = 'PNG'
     # BLP = 'BLP'
     BMP = 'BMP'
+    GIF = 'GIF'
 
     def __str__(self):
         return self.value
@@ -56,6 +59,8 @@ class ImageFormat(enum.Enum):
         #     return cls.BLP
         elif extension in BMP_EXTENSIONS:
             return cls.BMP
+        elif extension in GIF_EXTENSIONS:
+            return cls.GIF
         else:
             raise ValueError(f"Unsupported extension: {extension}")
 
@@ -84,6 +89,8 @@ def _encode_image(image: typing.BinaryIO, out_file: typing.BinaryIO, out_format:
     #     blp_encode(image, out_file)
     elif out_format == ImageFormat.BMP:
         bmp_encode(image, out_file)
+    elif out_format == ImageFormat.GIF:
+        gif_encode(image, out_file)
     else:
         raise ValueError(f"Unsupported format: {out_format}")
 
@@ -99,6 +106,8 @@ def _decode_image(extension: str, file_path: str):
     #     return blp_decode(file_path)
     elif extension in BMP_EXTENSIONS:
         return bmp_decode(file_path)
+    elif extension in GIF_EXTENSIONS:
+        return gif_decode(file_path)
     else:
         raise UnidentifiedExtensionError(f"Unsupported extension: {extension}")
 
