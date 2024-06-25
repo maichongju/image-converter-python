@@ -14,6 +14,7 @@ Although there are many image converters available online, all of them require s
 - JPEG
 - PNG
 - WEBP
+- BMP
 
 ## Getting Started
 
